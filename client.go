@@ -23,7 +23,13 @@ func NewClient(db *gorm.DB) *Client {
 }
 
 func (c *Client) InitializeMigrationTracking() error {
-	return c.DB.AutoMigrate(&Migration{})
+	err := c.enableUUIDExtension()
+	err = c.DB.AutoMigrate(&Migration{})
+	return err
+}
+
+func (c *Client) enableUUIDExtension() error {
+	return c.DB.Exec(`CREATE EXTENSION IF NOT EXISTS "uuid-ossp";`).Error
 }
 
 func (c *Client) PerformMigration(migrationName, executedBy string, migrationFunc func(*gorm.DB) error) error {
